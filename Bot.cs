@@ -21,6 +21,7 @@ namespace DC_Bot
 
         public Bot()
         {
+
             var json = string.Empty;
 
             using (var fs = File.OpenRead("config.json"))
