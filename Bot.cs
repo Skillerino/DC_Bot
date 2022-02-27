@@ -1,7 +1,10 @@
 ﻿using DC_Bot.CommandModules;
+using DC_Bot.Services.EventHandlers;
 using DSharpPlus;
 using DSharpPlus.CommandsNext;
+using DSharpPlus.Entities;
 using DSharpPlus.Interactivity;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
@@ -21,7 +24,6 @@ namespace DC_Bot
 
         public Bot()
         {
-
             var json = string.Empty;
 
             using (var fs = File.OpenRead("config.json"))
@@ -29,6 +31,7 @@ namespace DC_Bot
                 json = sr.ReadToEnd();
 
             var configJson = JsonConvert.DeserializeObject<ConfigJson>(json);
+
             var discordConfiguration = new DiscordConfiguration()
             {
                 Intents = DiscordIntents.DirectMessages
@@ -45,15 +48,34 @@ namespace DC_Bot
 
             Client = new DiscordClient(discordConfiguration);
 
+            //var services = new ServiceCollection().AddSingleton<IReactionRoleHandler>().BuildServiceProvider();
+
             var commandsConfiguration = new CommandsNextConfiguration()
             {
-                DmHelp = true,
+                DmHelp = false,
                 EnableDms = false,
                 StringPrefixes = new[] { "!" },
+                //Services = services,
             };
             Commands = Client.UseCommandsNext(commandsConfiguration);
 
             Commands.RegisterCommands<MainCommands>(); ;
+
+            /*Client.MessageCreated += async (s, e) =>
+            {
+                var thumbsUp = DiscordEmoji.FromName(s, ":heart:");
+                await e.Message.CreateReactionAsync(thumbsUp);
+            };
+
+            var addAdmin = new ReactionRoleHandler();
+
+            Client.MessageReactionAdded += (s, e) => addAdmin.handleEvent(s, e);
+
+            Client.MessageReactionAdded += async (s, e) =>
+            {
+                var thumbsUp = DiscordEmoji.FromName(s, ":heart:");
+                await e.Message.CreateReactionAsync(thumbsUp);
+            };*/
         }
 
         public async Task RunAsync()
